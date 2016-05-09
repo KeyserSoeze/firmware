@@ -23,6 +23,7 @@ DEPS=$(TARGET_CONFIG) feeds.conf patches $(wildcard patches/*)
 PROFILES=$(shell cat $(FW_DIR)/profiles/$(TARGET).profiles)
 
 FW_REVISION=$(shell $(REVISION))
+REVISION_IN_VERSIONMK:=$(shell grep "REVISION:=" $(OPENWRT_DIR)/include/version.mk)
 
 ifndef BUILDTYPE
 $(error BUILDTYPE is not set)
@@ -93,15 +94,27 @@ $(OPENWRT_DIR)/.config: .stamp-patched $(TARGET_CONFIG)
 	  $(MAKE) -C $(OPENWRT_DIR) defconfig
 
 # prepare openwrt working copy
-prepare: stamp-clean-prepared .stamp-prepared .stamp-build_rev
-.stamp-prepared: .stamp-patched $(OPENWRT_DIR)/.config
-	sed -i 's,^# REVISION:=.*,REVISION:=$(FW_REVISION),g' $(OPENWRT_DIR)/include/version.mk
+prepare: stamp-clean-prepared .stamp-prepared
+.stamp-prepared: .stamp-patched $(OPENWRT_DIR)/.config .stamp-build_rev
+# check if REVISION has already comment removed in openwrt/include/version.mk
+ifeq ($(REVISION_IN_VERSIONMK),\# REVISION:=x)
+	@echo untouched
+	#sed -i 's,^# REVISION:=.*,REVISION:=$(FW_REVISION),g' $(OPENWRT_DIR)/include/version.mk
+else ifeq ($(REVISION_IN_VERSIONMK),REVISION:=$(FW_REVISION))
+	@echo version.mk is current
+else
+	#ifeq ($(subst REVISION:=,,$(REVISION_IN_VERSIONMK)),REVISION:=)
+	@echo different
+	sed -i 's,^REVISION:=.*,REVISION:=$(FW_REVISION),g' $(OPENWRT_DIR)/include/version.mk
+endif
 ifeq ($(BUILDTYPE),unstable)
-	sed -i "/^CONFIG_VERSION_NUMBER=/ s/\"$$/\+$(FW_REVISION)\"/" $(OPENWRT_DIR)/.config
+	sed -i "/^CONFIG_VERSION_NUMBER=/d" $(OPENWRT_DIR)/.config
+	cat $(TARGET_CONFIG)|grep -e "^CONFIG_VERSION_NUMBER=" | \
+	  sed "/^CONFIG_VERSION_NUMBER=/ s/\"$$/\+$(FW_REVISION)\"/" >>$(OPENWRT_DIR)/.config
 endif
 ifdef REPOPATH
 	# escape "/" in PATH for SED by "\/"
-	sed -i "s/^CONFIG_VERSION_REPO=.*$$/CONFIG_VERSION_REPO=$(subst /,\/,$(REPOPATH))/" $(OPENWRT_DIR)/.config
+	sed -i 's,^CONFIG_VERSION_REPO=.*,CONFIG_VERSION_REPO=$(subst /,\/,$(REPOPATH)),g' $(OPENWRT_DIR)/.config
 endif
 	touch $@
 
