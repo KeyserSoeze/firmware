@@ -99,7 +99,7 @@ prepare: stamp-clean-prepared .stamp-prepared
 # check if REVISION has already comment removed in openwrt/include/version.mk
 ifeq ($(REVISION_IN_VERSIONMK),\# REVISION:=x)
 	@echo untouched
-	#sed -i 's,^# REVISION:=.*,REVISION:=$(FW_REVISION),g' $(OPENWRT_DIR)/include/version.mk
+	sed -i 's,^# REVISION:=.*,REVISION:=$(FW_REVISION),g' $(OPENWRT_DIR)/include/version.mk
 else ifeq ($(REVISION_IN_VERSIONMK),REVISION:=$(FW_REVISION))
 	@echo version.mk is current
 else
