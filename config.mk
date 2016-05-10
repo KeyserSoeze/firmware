@@ -7,4 +7,4 @@ OPENWRT_COMMIT=64e116779c0f7da6d98068b8e7c50f528c8a91f2
 REPOPATH=https://buildbot.berlin.freifunk.net/stable
 MAKE_ARGS=
 #BUILDTYPE - unstable / release
-BUILDTYPE=unstable
+BUILDTYPE=release
