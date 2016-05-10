@@ -28,10 +28,8 @@ REVISION_IN_VERSIONMK:=$(shell grep "REVISION:=" $(OPENWRT_DIR)/include/version.
 ifndef BUILDTYPE
 $(error BUILDTYPE is not set)
 endif
-ifneq ($(BUILDTYPE),release)
- ifneq (§(BUILDTYPE),unstable)
-  $(error invalid BUILDTYPE)
- endif
+ifeq ($(filter release unstable,$(BUILDTYPE)),)
+ $(error invalid BUILDTYPE "$(BUILDTYPE)")
 endif
 
 default: firmwares
