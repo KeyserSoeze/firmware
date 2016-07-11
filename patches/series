@@ -11,3 +11,6 @@
 018-backport-openwrt-r43974-736-MIPS-ath79-chained-irq-disable.patch
 019-openssl-102a-download-path.patch
 020-update-olsrd.patch
+023-cpe_new_version.patch
+024-tpl-CPE_enable_LNA.patch
+025-tmux-new_src_url.patch
